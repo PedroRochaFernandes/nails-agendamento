@@ -1,0 +1,817 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Apresentação: agendamento online para nail designers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff; --surface: #ffffff; --surface-2: #f1f6ff; --border: #dbe4f3; --line: #c9d6ea;
+    --text: #0f1d3a; --muted: #5d6c88;
+    --accent: #2f6fe4;   /* azul para texto e contornos sobre o fundo branco */
+    --fill: #2f6fe4;     /* azul de preenchimento, com texto branco em cima */
+    --on-fill: #ffffff;
+    --display: "Outfit", "Segoe UI", sans-serif;
+    --font: "Manrope", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #fff; overflow: hidden; }
+
+  /* Palco fixo de 1920x1080: é este quadro que vira o vídeo */
+  #stage {
+    position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0;
+    color: var(--text); font-family: var(--font); -webkit-font-smoothing: antialiased;
+    background:
+      radial-gradient(ellipse 70% 60% at 88% -8%, rgba(47, 111, 228, .16), transparent 60%),
+      radial-gradient(ellipse 50% 45% at -5% 108%, rgba(47, 111, 228, .09), transparent 60%),
+      linear-gradient(180deg, #ffffff, #f2f7ff);
+  }
+  /* brilhos: pontinhos azuis soltos (bem mais leve de desenhar do que um canvas de tela inteira) */
+  #dust { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+  #dust i { position: absolute; left: 0; top: 0; border-radius: 50%; will-change: transform, opacity;
+    background: radial-gradient(circle, #6f9cf0 0 26%, rgba(111, 156, 240, .22) 34%, transparent 70%); }
+  #fx { position: absolute; left: 0; top: 0; z-index: 60; pointer-events: none; display: none; }
+  .scene { position: absolute; inset: 0; visibility: hidden; z-index: 1; }
+
+  .eyebrow { font: 600 22px var(--font); letter-spacing: .24em; text-transform: uppercase; color: var(--accent); white-space: nowrap; }
+  h1 { font: 600 108px/1.02 var(--display); letter-spacing: -.025em; }
+  h2 { font: 600 72px/1.06 var(--display); letter-spacing: -.02em; }
+  .gold { color: var(--accent); }
+  .w { display: inline-block; }   /* palavra animada individualmente */
+
+  /* cenas de texto centralizado */
+  .center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 160px; }
+  .pole-wrap { position: relative; margin-bottom: 26px; }
+  .pole { position: relative; line-height: 0; }
+  .pole svg { display: block; width: 48px; height: 88px; }
+  .halo { position: absolute; left: 50%; top: 50%; width: 360px; height: 360px; margin: -180px 0 0 -180px; border-radius: 50%; background: radial-gradient(circle, rgba(47, 111, 228, .22), transparent 62%); }
+  .rule { width: 420px; height: 5px; border-radius: 3px; margin-top: 30px; background: linear-gradient(90deg, transparent, var(--accent) 20% 80%, transparent); }
+  .sub { font: 400 36px/1.4 var(--font); color: var(--muted); margin-top: 30px; max-width: 1500px; }
+
+  /* coluna de texto ao lado do aparelho */
+  .col { position: absolute; left: 120px; top: 0; bottom: 0; width: 900px; display: flex; flex-direction: column; justify-content: center; }
+  .col h2 { margin-top: 20px; }
+  .col.narrow { left: 76px; width: 540px; }
+  .col.narrow h2 { font-size: 62px; }
+  .bullets { list-style: none; margin-top: 26px; }
+  .bullets li { display: flex; gap: 20px; align-items: flex-start; font: 500 35px/1.3 var(--font); margin-top: 28px; }
+  .bullets li::before { content: ""; flex: 0 0 14px; height: 14px; margin-top: 15px; border-radius: 50%; background: var(--accent); transform: scale(var(--pop, 1)); box-shadow: 0 0 calc(var(--pop, 1) * 14px) rgba(47, 111, 228, .4); }
+  .bullets.steps { counter-reset: n; }
+  .bullets.steps li { counter-increment: n; align-items: center; }
+  .bullets.steps li::before { content: counter(n); flex: 0 0 52px; height: 52px; margin: 0; display: grid; place-items: center; font: 600 26px var(--display); color: var(--on-fill); background: var(--fill); }
+  .narrow .bullets li { font-size: 30px; gap: 16px; margin-top: 24px; }
+  .narrow .bullets li::before { margin-top: 12px; flex-basis: 12px; height: 12px; }
+
+  /* cartões do "problema" */
+  .cards { display: flex; gap: 32px; margin-top: 64px; }
+  .card {
+    position: relative; width: 480px; padding: 40px 36px; text-align: left; background: var(--surface); border-radius: 24px;
+    border: 1px solid color-mix(in srgb, var(--accent) calc(var(--done, 0) * 100%), var(--border));
+    box-shadow: 0 30px 70px rgba(15, 29, 58, .10), 0 0 calc(var(--done, 0) * 50px) rgba(47, 111, 228, .22);
+    transform-origin: 50% 100%;
+  }
+  .card .ico { display: block; width: 56px; height: 56px; fill: none; stroke: var(--accent); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .card h3 { font: 700 36px/1.15 var(--font); margin: 22px 0 12px; }
+  .card p { font: 400 25px/1.45 var(--font); color: var(--muted); }
+  .stamp { position: absolute; right: -18px; top: -18px; width: 68px; height: 68px; border-radius: 50%; display: grid; place-items: center; background: var(--fill); box-shadow: 0 8px 26px rgba(15, 29, 58, .2), 0 0 30px rgba(47, 111, 228, .35); }
+  .stamp svg { width: 34px; height: 34px; fill: none; stroke: var(--on-fill); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .punch { font: 600 54px/1.15 var(--display); letter-spacing: -.015em; margin-top: 60px; }
+
+  /* brilho atrás dos aparelhos */
+  .glow { position: absolute; border-radius: 50%; will-change: transform, opacity; background: radial-gradient(circle, rgba(47, 111, 228, .2), transparent 62%); }
+  .glow.p { left: 1020px; top: 140px; width: 800px; height: 800px; }
+  .glow.b { left: 760px; top: 60px; width: 1020px; height: 960px; background: radial-gradient(ellipse, rgba(47, 111, 228, .13), transparent 64%); }
+
+  /* celular */
+  .phone {
+    position: absolute; left: 1196px; top: 71px; width: 448px; height: 937px; padding: 14px;
+    border-radius: 60px; background: #0f1d3a; border: 2px solid #23345c;
+    box-shadow: 0 50px 120px rgba(15, 29, 58, .28), 0 0 90px rgba(47, 111, 228, .12);
+  }
+  .phone .screen { position: relative; width: 420px; height: 909px; border-radius: 46px; overflow: hidden; background: var(--bg); }
+  .phone .layer { position: absolute; left: 0; top: 0; width: 420px; height: 909px; }
+  /* barra do topo do site fica fixa enquanto a página "rola" por baixo */
+  .phone .navfix { position: absolute; left: 0; top: 0; width: 420px; height: 66px; background-size: 420px 909px; z-index: 40; }
+  /* reflexo que atravessa o vidro */
+  .shine { position: absolute; top: -20%; left: 0; width: 60%; height: 140%; z-index: 45; opacity: 0; background: linear-gradient(100deg, transparent 0, rgba(255, 255, 255, .0) 30%, rgba(120, 160, 240, .14) 50%, rgba(255, 255, 255, 0) 70%, transparent 100%); }
+
+  /* toque do dedo */
+  .tap { position: absolute; width: 0; height: 0; z-index: 50; }
+  .tap i { position: absolute; border-radius: 50%; }
+  .tap .dot { left: -17px; top: -17px; width: 34px; height: 34px; background: rgba(21, 70, 184, .82); border: 3px solid #fff; box-shadow: 0 2px 10px rgba(15, 29, 58, .35); }
+  .tap .ring { left: -46px; top: -46px; width: 92px; height: 92px; border: 4px solid var(--accent); background: rgba(47, 111, 228, .16); }
+  .tap .ring2 { left: -46px; top: -46px; width: 92px; height: 92px; border: 2px solid rgba(47, 111, 228, .55); }
+
+  /* janela de navegador (painel do dono) */
+  .browser {
+    position: absolute; left: 680px; top: 124px; width: 1180px; border-radius: 18px; overflow: hidden;
+    background: var(--surface); border: 1px solid var(--line);
+    box-shadow: 0 50px 120px rgba(15, 29, 58, .22), 0 0 90px rgba(47, 111, 228, .1);
+  }
+  .browser .bar { height: 44px; display: flex; align-items: center; gap: 9px; padding: 0 18px; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+  .browser .bar b { width: 13px; height: 13px; border-radius: 50%; background: #c9d6ea; }
+  .browser .bar span { margin-left: 18px; padding: 5px 18px; border-radius: 99px; background: #fff; border: 1px solid var(--border); font: 500 15px var(--font); color: var(--muted); }
+  .browser .view { position: relative; width: 1180px; height: 787px; overflow: hidden; background: var(--bg); }
+  .browser .zoom { position: absolute; inset: 0; transform-origin: 0 0; }
+  .browser .layer { position: absolute; left: 0; top: 0; width: 1180px; height: 787px; }
+  /* destaque: contorno azul pulsando e o resto da tela escurecido */
+  .hl { position: absolute; border: 3px solid var(--accent); border-radius: 14px; z-index: 30;
+    box-shadow: 0 0 0 4000px rgba(15, 29, 58, .42), 0 0 calc(14px + var(--pulse, 0) * 26px) rgba(47, 111, 228, calc(.35 + var(--pulse, 0) * .4)); }
+
+  /* etiquetas que "saltam" ao lado do aparelho */
+  .callout { position: absolute; z-index: 20; display: flex; align-items: center; gap: 12px; padding: 16px 28px; border-radius: 14px; white-space: nowrap;
+    font: 700 30px var(--font); color: var(--on-fill); background: var(--fill); box-shadow: 0 18px 44px rgba(15, 29, 58, .22), 0 0 40px rgba(47, 111, 228, .25); }
+  .callout svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* encerramento */
+  .chips { display: flex; gap: 20px; margin-top: 56px; }
+  .chip { padding: 16px 30px; border-radius: 99px; border: 1px solid var(--accent); color: var(--accent); background: rgba(47, 111, 228, .07); font: 600 30px var(--font); }
+  .tagline { font: 500 30px var(--font); color: var(--muted); margin-top: 60px; text-transform: none; }
+
+  .brand { position: absolute; left: 120px; bottom: 54px; display: flex; align-items: center; gap: 12px; font: 500 22px var(--display); letter-spacing: .01em; color: var(--muted); }
+  .brand svg { width: 12px; height: 22px; }
+  .brand.narrow { left: 76px; }
+
+  /* barra de progresso do vídeo */
+  #progress { position: absolute; left: 0; bottom: 0; width: 100%; height: 5px; z-index: 70; background: rgba(15, 29, 58, .06); }
+  #progress i { display: block; height: 100%; width: 100%; transform-origin: 0 50%; background: linear-gradient(90deg, #1546b8, #6f9cf0); }
+
+  /* transição entre cenas: faixas diagonais azuis varrendo a tela */
+  #wipe { position: absolute; inset: 0; z-index: 100; overflow: hidden; visibility: hidden; }
+  #wipe .bars { position: absolute; left: 0; top: -310px; width: 3688px; height: 1700px; display: flex; gap: 26px; }
+  #wipe .g { flex: 0 0 80px; background: var(--fill); }
+  #wipe .c { flex: 0 0 12px; background: #9dbcf5; }
+  #wipe .d { flex: 1; background: repeating-linear-gradient(90deg, #eef4ff 0 90px, #f8fbff 90px 180px); }
+  #blackout { position: absolute; inset: 0; z-index: 110; background: #fff; opacity: 0; pointer-events: none; }
+
+  #hud { position: fixed; left: 12px; bottom: 10px; font: 12px/1.4 var(--font); color: #777; z-index: 9; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="dust"></div>
+
+  <!-- 1. Abertura -->
+  <section class="scene" id="abertura" data-dur="6.4">
+    <div class="center">
+      <div class="pole-wrap"><div class="halo" data-at="0.3" data-fx="halo"></div><div class="pole" data-at="0.2" data-fx="drop"><svg viewBox="0 0 14 26" width="48" height="88" aria-hidden="true"><rect x="4.5" y="0" width="5" height="9" rx="1.5" fill="#1546b8"/><rect x="3" y="8.5" width="8" height="2.5" rx="1" fill="#1546b8"/><rect x="0.5" y="11" width="13" height="15" rx="4" fill="#2f6fe4"/><rect x="3" y="14" width="2" height="8" rx="1" fill="#ffffff" opacity=".55"/></svg></div></div>
+      <div class="eyebrow" data-at="0.6" data-fx="track">Para nail designers</div>
+      <h1 style="margin-top:26px" data-at="0.9" data-fx="words" data-stagger="0.11" data-shimmer="3.2">Sua agenda cheia,<br><span class="gold">sem ficar presa ao WhatsApp.</span></h1>
+      <div class="rule" data-at="2.6" data-fx="rule"></div>
+      <p class="sub" data-at="3.2">Agendamento online 24 horas e um painel completo para o seu estúdio.</p>
+    </div>
+  </section>
+
+  <!-- 2. O problema -->
+  <section class="scene" id="problema" data-dur="12.2">
+    <div class="center">
+      <h2 data-at="0.4" data-fx="words" data-stagger="0.12">Parece familiar?</h2>
+      <div class="cards">
+        <div class="card" data-at="2.3" data-fx="flip">
+          <svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><path d="M9 9h30a4 4 0 0 1 4 4v17a4 4 0 0 1-4 4H22l-9 7v-7H9a4 4 0 0 1-4-4V13a4 4 0 0 1 4-4z"/><path d="M15 19h18M15 25h11"/></svg>
+          <h3>“Tem horário hoje?”</h3>
+          <p>Mensagens o dia inteiro, respondidas entre uma cliente e outra.</p>
+          <div class="stamp" data-at="9.2" data-fx="stamp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+        </div>
+        <div class="card" data-at="4.1" data-fx="flip">
+          <svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="25" r="17"/><path d="M24 15v10l7 5M18 4h12"/></svg>
+          <h3>Horário vago</h3>
+          <p>A cliente desiste em cima da hora e ninguém ocupa a vaga.</p>
+          <div class="stamp" data-at="9.5" data-fx="stamp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+        </div>
+        <div class="card" data-at="6.4" data-fx="flip">
+          <svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><path d="M12 5h24a3 3 0 0 1 3 3v32a3 3 0 0 1-3 3H12zM12 5v38M8 12h8M8 20h8M8 28h8M8 36h8M20 14h13M20 21h13M20 28h9"/></svg>
+          <h3>Agenda no caderno</h3>
+          <p>Preços, folgas e faturamento espalhados, sem controle.</p>
+          <div class="stamp" data-at="9.8" data-fx="stamp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+        </div>
+      </div>
+      <p class="punch" data-at="8.5" data-fx="words" data-stagger="0.09" data-shimmer="10.2">Dá para resolver tudo isso <span class="gold">em um só lugar.</span></p>
+    </div>
+  </section>
+
+  <!-- 3. O cliente agenda sozinho -->
+  <section class="scene" id="cliente" data-dur="19.4">
+    <div class="col">
+      <div class="eyebrow" data-at="0.3" data-fx="track">Para a cliente</div>
+      <h2 data-at="0.5" data-fx="words">Ela agenda sozinha,<br>em menos de um minuto.</h2>
+      <ul class="bullets steps">
+        <li data-at="2.6" data-dim="6.0">Vê os serviços e os preços</li>
+        <li data-at="6.1" data-dim="10.1">Escolhe a profissional e o dia</li>
+        <li data-at="10.2" data-dim="14.2">Só vê horários realmente livres</li>
+        <li data-at="14.3">Confirma e recebe o código</li>
+      </ul>
+    </div>
+    <div class="glow p"></div>
+    <div class="phone"><div class="screen"></div></div>
+    <div class="callout" style="left:780px;top:150px" data-at="16.9" data-fx="pop" data-rot="-5"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Horário confirmado</div>
+    <div class="brand"><svg viewBox="0 0 14 26" width="12" height="22" aria-hidden="true"><rect x="4.5" y="0" width="5" height="9" rx="1.5" fill="#1546b8"/><rect x="3" y="8.5" width="8" height="2.5" rx="1" fill="#1546b8"/><rect x="0.5" y="11" width="13" height="15" rx="4" fill="#2f6fe4"/><rect x="3" y="14" width="2" height="8" rx="1" fill="#ffffff" opacity=".55"/></svg>Agendamento online para nail designers</div>
+  </section>
+
+  <!-- 4. Fila de espera -->
+  <section class="scene" id="fila" data-dur="13.2">
+    <div class="col">
+      <div class="eyebrow" data-at="0.3" data-fx="track">Horário ocupado?</div>
+      <h2 data-at="0.5" data-fx="words">Fila de espera:<br>ninguém fica sem resposta.</h2>
+      <ul class="bullets">
+        <li data-at="1.6" data-dim="3.3">Horário já agendado aparece como ocupado</li>
+        <li data-at="3.4" data-dim="7.4">Com um toque, a cliente entra na fila</li>
+        <li data-at="7.6">Se vagar, o horário é dela, automaticamente</li>
+      </ul>
+    </div>
+    <div class="glow p"></div>
+    <div class="phone"><div class="screen"></div></div>
+    <div class="callout" style="left:832px;top:150px" data-at="8.9" data-fx="pop" data-rot="-5">1ª da fila de espera</div>
+    <div class="brand"><svg viewBox="0 0 14 26" width="12" height="22" aria-hidden="true"><rect x="4.5" y="0" width="5" height="9" rx="1.5" fill="#1546b8"/><rect x="3" y="8.5" width="8" height="2.5" rx="1" fill="#1546b8"/><rect x="0.5" y="11" width="13" height="15" rx="4" fill="#2f6fe4"/><rect x="3" y="14" width="2" height="8" rx="1" fill="#ffffff" opacity=".55"/></svg>Agendamento online para nail designers</div>
+  </section>
+
+  <!-- 5. Painel do dono: agenda -->
+  <section class="scene" id="painel" data-dur="12.8">
+    <div class="col narrow">
+      <div class="eyebrow" data-at="0.3" data-fx="track">Para o estúdio</div>
+      <h2 data-at="0.5" data-fx="words">O dia inteiro<br>em uma tela.</h2>
+      <ul class="bullets">
+        <li data-at="1.6" data-dim="4.8">Agenda por profissional, sempre atualizada</li>
+        <li data-at="4.9" data-dim="8.9">Faturamento previsto e já realizado</li>
+        <li data-at="9.0">Atendido, cancelado ou faltou: um clique</li>
+      </ul>
+    </div>
+    <div class="glow b"></div>
+    <div class="browser"><div class="bar"><b></b><b></b><b></b><span>Painel do estúdio</span></div><div class="view"><div class="zoom"></div></div></div>
+    <div class="brand narrow"><svg viewBox="0 0 14 26" width="12" height="22" aria-hidden="true"><rect x="4.5" y="0" width="5" height="9" rx="1.5" fill="#1546b8"/><rect x="3" y="8.5" width="8" height="2.5" rx="1" fill="#1546b8"/><rect x="0.5" y="11" width="13" height="15" rx="4" fill="#2f6fe4"/><rect x="3" y="14" width="2" height="8" rx="1" fill="#ffffff" opacity=".55"/></svg>Agendamento online para nail designers</div>
+  </section>
+
+  <!-- 6. A fila preenche o cancelamento -->
+  <section class="scene" id="vaga" data-dur="14.2">
+    <div class="col narrow">
+      <div class="eyebrow" data-at="0.3" data-fx="track">Alguém cancelou?</div>
+      <h2 data-at="0.5" data-fx="words">A vaga se preenche sozinha.</h2>
+      <ul class="bullets">
+        <li data-at="1.9" data-dim="4.8">A fila de espera aparece no painel</li>
+        <li data-at="4.9" data-dim="9.1">A próxima da fila entra no horário vago</li>
+        <li data-at="9.2">O aviso por WhatsApp já sai pronto para enviar</li>
+      </ul>
+    </div>
+    <div class="glow b"></div>
+    <div class="browser"><div class="bar"><b></b><b></b><b></b><span>Painel do estúdio</span></div><div class="view"><div class="zoom"></div></div></div>
+    <div class="callout" style="left:1392px;top:84px" data-at="6.1" data-out="8.7" data-fx="pop" data-rot="3"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Vaga preenchida sozinha</div>
+    <div class="brand narrow"><svg viewBox="0 0 14 26" width="12" height="22" aria-hidden="true"><rect x="4.5" y="0" width="5" height="9" rx="1.5" fill="#1546b8"/><rect x="3" y="8.5" width="8" height="2.5" rx="1" fill="#1546b8"/><rect x="0.5" y="11" width="13" height="15" rx="4" fill="#2f6fe4"/><rect x="3" y="14" width="2" height="8" rx="1" fill="#ffffff" opacity=".55"/></svg>Agendamento online para nail designers</div>
+  </section>
+
+  <!-- 7. Preços, horários e folgas -->
+  <section class="scene" id="controle" data-dur="12.8">
+    <div class="col narrow">
+      <div class="eyebrow" data-at="0.3" data-fx="track">Você no controle</div>
+      <h2 data-at="0.5" data-fx="words">Preços, horários e folgas do seu jeito.</h2>
+      <ul class="bullets">
+        <li data-at="1.0" data-dim="4.5">Serviços, preços e duração</li>
+        <li data-at="4.7" data-dim="8.6">Expediente e almoço de cada profissional</li>
+        <li data-at="8.8">Folgas, feriados e férias bloqueados no site</li>
+      </ul>
+    </div>
+    <div class="glow b"></div>
+    <div class="browser"><div class="bar"><b></b><b></b><b></b><span>Painel do estúdio</span></div><div class="view"><div class="zoom"></div></div></div>
+    <div class="brand narrow"><svg viewBox="0 0 14 26" width="12" height="22" aria-hidden="true"><rect x="4.5" y="0" width="5" height="9" rx="1.5" fill="#1546b8"/><rect x="3" y="8.5" width="8" height="2.5" rx="1" fill="#1546b8"/><rect x="0.5" y="11" width="13" height="15" rx="4" fill="#2f6fe4"/><rect x="3" y="14" width="2" height="8" rx="1" fill="#ffffff" opacity=".55"/></svg>Agendamento online para nail designers</div>
+  </section>
+
+  <!-- 8. Localização -->
+  <section class="scene" id="local" data-dur="8.2">
+    <div class="col">
+      <div class="eyebrow" data-at="0.3" data-fx="track">Fácil de encontrar</div>
+      <h2 data-at="0.5" data-fx="words">Endereço, mapa e contato<br>sempre à mão.</h2>
+      <ul class="bullets">
+        <li data-at="1.3">Horário de funcionamento por dia da semana</li>
+        <li data-at="2.6">WhatsApp e Instagram a um toque</li>
+        <li data-at="4.1">Mapa com botão “como chegar”</li>
+      </ul>
+    </div>
+    <div class="glow p"></div>
+    <div class="phone"><div class="screen"></div></div>
+    <div class="brand"><svg viewBox="0 0 14 26" width="12" height="22" aria-hidden="true"><rect x="4.5" y="0" width="5" height="9" rx="1.5" fill="#1546b8"/><rect x="3" y="8.5" width="8" height="2.5" rx="1" fill="#1546b8"/><rect x="0.5" y="11" width="13" height="15" rx="4" fill="#2f6fe4"/><rect x="3" y="14" width="2" height="8" rx="1" fill="#ffffff" opacity=".55"/></svg>Agendamento online para nail designers</div>
+  </section>
+
+  <!-- 9. Encerramento -->
+  <section class="scene" id="fim" data-dur="10.2">
+    <div class="center">
+      <div class="pole-wrap"><div class="halo" data-at="0.3" data-fx="halo"></div><div class="pole" data-at="0.2" data-fx="drop"><svg viewBox="0 0 14 26" width="48" height="88" aria-hidden="true"><rect x="4.5" y="0" width="5" height="9" rx="1.5" fill="#1546b8"/><rect x="3" y="8.5" width="8" height="2.5" rx="1" fill="#1546b8"/><rect x="0.5" y="11" width="13" height="15" rx="4" fill="#2f6fe4"/><rect x="3" y="14" width="2" height="8" rx="1" fill="#ffffff" opacity=".55"/></svg></div></div>
+      <h1 data-at="0.7" data-fx="words" data-stagger="0.14">Menos mensagens.</h1>
+      <h1 data-at="2.0" data-fx="words" data-stagger="0.14">Menos horário vago.</h1>
+      <h1 data-at="3.6" data-fx="words" data-stagger="0.16" data-shimmer="4.4"><span class="gold">Mais clientes.</span></h1>
+      <div class="chips">
+        <div class="chip" data-at="5.2" data-fx="pop">Agendamento online 24h</div>
+        <div class="chip" data-at="5.5" data-fx="pop">Fila de espera automática</div>
+        <div class="chip" data-at="5.8" data-fx="pop">Painel completo do estúdio</div>
+      </div>
+      <p class="tagline" data-at="6.4">Agendamento online para nail designers</p>
+    </div>
+  </section>
+
+  <canvas id="fx" width="1920" height="1080"></canvas>
+  <div id="progress"><i></i></div>
+  <div id="wipe"><div class="bars"><div class="g"></div><div class="c"></div><div class="d"></div><div class="c"></div><div class="g"></div></div></div>
+  <div id="blackout"></div>
+</div>
+<div id="hud"></div>
+
+<script src="telas/telas.js"></script>
+<script src="narracao/narracao.js" onerror="window.NARRACAO = null"></script>
+<script>
+// =============================================================== motor da linha do tempo
+// Nada aqui usa relógio: cada quadro é desenhado a partir do tempo (em segundos).
+// Assim o vídeo pode ser gerado quadro a quadro, sempre idêntico.
+const clamp01 = v => Math.max(0, Math.min(1, v));
+const easeOut = t => 1 - Math.pow(1 - t, 3);
+const easeIO = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const easeBack = t => 1 + 2.70158 * Math.pow(t - 1, 3) + 1.70158 * Math.pow(t - 1, 2); // passa um pouco do ponto e volta
+const f = n => n.toFixed(3);
+/** Gerador pseudoaleatório com semente: partículas e confetes caem sempre do mesmo jeito. */
+function rng(seed) {
+  return () => {
+    seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+const NARR = window.NARRACAO || { falas: [] };
+const scenes = [], bursts = [];
+let totalMs = 0;
+for (const el of document.querySelectorAll('.scene')) {
+  // a cena dura o que está em data-dur, ou mais, se a narração dela precisar
+  const falas = NARR.falas.filter(x => x.cena === el.id);
+  const need = Math.max(0, ...falas.map(x => x.at + x.dur + 0.6));
+  const durMs = Math.max(Math.round(Number(el.dataset.dur) * 1000), Math.ceil(need * 5) * 200); // múltiplos de 0,2 s
+  const sc = { el, id: el.id, start: totalMs / 1000, dur: durMs / 1000, items: [], falas };
+  totalMs += durMs;
+  sc.end = totalMs / 1000;
+  scenes.push(sc);
+  for (const node of el.querySelectorAll('[data-at]')) addText(sc, node);
+}
+const DURACAO = totalMs / 1000;
+const scene = id => scenes.find(s => s.id === id);
+
+// ----- textos e elementos com data-at (quando entra) e data-fx (como entra)
+function addText(sc, node) {
+  const at = Number(node.dataset.at);
+  const fx = node.dataset.fx || (node.tagName === 'LI' ? 'bullet' : 'up');
+  const dim = node.dataset.dim ? Number(node.dataset.dim) : null;   // perde o destaque
+  const out = node.dataset.out ? Number(node.dataset.out) : null;   // some
+  const rot = Number(node.dataset.rot || 0);
+  if (fx === 'words') return addWords(sc, node, at);
+  sc.items.push((t, T) => {
+    const p = easeOut(clamp01((t - at) / 0.7));
+    const q = dim == null ? 0 : easeIO(clamp01((t - dim) / 0.5));
+    const gone = out == null ? 0 : easeIO(clamp01((t - out) / 0.4));
+    let o = p * (1 - 0.62 * q) * (1 - gone), tr = 'none';
+    if (fx === 'up') tr = `translateY(${f((1 - p) * 34)}px)`;
+    else if (fx === 'bullet') {                       // desliza da esquerda; a bolinha "estoura"
+      tr = `translateX(${f((1 - p) * -44)}px)`;
+      node.style.setProperty('--pop', f(Math.max(0, easeBack(clamp01((t - at) / 0.6)))));
+    } else if (fx === 'pop' || fx === 'stamp') {      // salta com um quique
+      const b = easeBack(clamp01((t - at) / 0.6));
+      tr = `scale(${f(Math.max(0, 0.2 + 0.8 * b))}) rotate(${f(rot + (1 - b) * -16)}deg)`;
+      o = clamp01((t - at) / 0.18) * (1 - gone);
+      if (fx === 'stamp') node.parentElement.style.setProperty('--done', f(clamp01((t - at) / 0.5)));
+    } else if (fx === 'flip') {                       // cartão levanta girando em 3D
+      const b = easeBack(clamp01((t - at) / 0.95));
+      tr = `perspective(1400px) rotateX(${f((1 - b) * -68)}deg) translateY(${f((1 - b) * 70)}px)`;
+      if (t - at >= 0.95) tr = 'none';
+      o = clamp01((t - at) / 0.35);
+    } else if (fx === 'track') {                      // letras se aproximam
+      node.style.letterSpacing = `${f(0.24 + (1 - p) * 0.55)}em`;
+    } else if (fx === 'rule') {                       // traço cresce do centro
+      tr = `scaleX(${f(easeIO(clamp01((t - at) / 0.8)))})`;
+      o = t >= at ? 1 : 0;
+    } else if (fx === 'drop') {                       // cai com quique
+      const b = easeBack(clamp01((t - at) / 0.7));
+      tr = `translateY(${f((1 - b) * -70)}px) scale(${f(Math.max(0, 0.4 + 0.6 * b))})`;
+      o = clamp01((t - at) / 0.2);
+    } else if (fx === 'halo') {                       // brilho que respira
+      tr = `scale(${f(0.85 + 0.15 * Math.sin(T * 1.7))})`;
+      o = p * (0.6 + 0.3 * Math.sin(T * 1.7 + 1));
+    }
+    node.style.opacity = f(o);
+    node.style.transform = tr;
+  });
+}
+
+// Título palavra a palavra: cada uma sobe, entra em foco e (se dourada) recebe uma onda de brilho
+function addWords(sc, node, at) {
+  const words = [];
+  (function split(n) {
+    for (const c of [...n.childNodes]) {
+      if (c.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        for (const part of c.textContent.split(/(\s+)/)) {
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.append(' '); continue; }
+          const w = document.createElement('span');
+          w.className = 'w';
+          w.textContent = part;
+          frag.append(w);
+          words.push(w);
+        }
+        c.replaceWith(frag);
+      } else if (c.nodeType === 1 && c.tagName !== 'BR') split(c);
+    }
+  })(node);
+  const stagger = Number(node.dataset.stagger || 0.08);
+  const shimmer = node.dataset.shimmer ? Number(node.dataset.shimmer) : null;
+  const golden = words.map(w => !!w.closest('.gold'));
+  sc.items.push(t => {
+    words.forEach((w, k) => {
+      const p = easeOut(clamp01((t - at - k * stagger) / 0.6));
+      let filter = p < 1 ? `blur(${f((1 - p) * 9)}px)` : '';
+      if (shimmer != null && golden[k]) {
+        const d = (t - shimmer - k * 0.08) / 0.7;
+        const b = d > 0 && d < 1 ? Math.sin(d * Math.PI) : 0;
+        if (b > 0.01) filter += ` brightness(${f(1 + 0.4 * b)}) drop-shadow(0 0 ${f(20 * b)}px rgba(111, 156, 240, ${f(0.6 * b)}))`;
+      }
+      w.style.opacity = f(p);
+      w.style.transform = p < 1 ? `translateY(${f((1 - p) * 0.5)}em)` : 'none';
+      w.style.filter = filter || 'none';
+    });
+  });
+}
+
+function layerImg(file) {
+  const im = new Image();
+  im.decoding = 'sync'; // sem decodificação tardia: o quadro capturado precisa estar completo
+  im.src = file;
+  im.className = 'layer';
+  return im;
+}
+
+/** Aparelho entra girando em 3D e pousa no lugar; o brilho atrás dele respira. */
+function deviceIn(sc, el, kind, at = 0.25) {
+  const glow = sc.el.querySelector('.glow');
+  sc.items.push((t, T) => {
+    const p = easeOut(clamp01((t - at) / 1.2));
+    el.style.opacity = f(clamp01((t - at) / 0.35));
+    el.style.transform = p >= 1 ? 'none' : kind === 'phone'
+      ? `perspective(2200px) translate3d(${f((1 - p) * 240)}px, ${f((1 - p) * 50)}px, 0) rotateY(${f((1 - p) * -34)}deg) rotateZ(${f((1 - p) * 4.5)}deg) scale(${f(0.85 + 0.15 * p)})`
+      : `perspective(2400px) translate3d(0, ${f((1 - p) * 100)}px, 0) rotateX(${f((1 - p) * 17)}deg) scale(${f(0.9 + 0.1 * p)})`;
+    if (glow) {
+      glow.style.opacity = f(p * (0.7 + 0.3 * Math.sin(T * 1.3)));
+      glow.style.transform = `scale(${f(0.94 + 0.06 * Math.sin(T * 0.9 + 1))})`;
+    }
+  });
+}
+
+/**
+ * Sequência de telas dentro do celular.
+ * passos: { img, at, how: 'scroll' | 'fade' }  troca de tela
+ *         { tap: [tela, elemento], at }        toque do dedo sobre um elemento da tela
+ *         { shine: instante }                  reflexo atravessa o vidro
+ *         { confetti: instante }               confete saindo do celular
+ */
+function phoneSeq(id, steps) {
+  const sc = scene(id), phone = sc.el.querySelector('.phone'), screen = phone.querySelector('.screen');
+  const K = 420 / TELAS.celular.w, H = 909;
+  deviceIn(sc, phone, 'phone');
+  const layers = steps.filter(s => s.img).map((s, i) => {
+    const el = layerImg(TELAS.shots[s.img].file);
+    el.style.zIndex = i + 1;
+    screen.append(el);
+    return { ...s, el, d: s.how === 'scroll' ? 0.8 : 0.35 };
+  });
+  const nav = document.createElement('div');
+  nav.className = 'navfix';
+  nav.style.backgroundImage = `url(${TELAS.shots['c2-servicos'].file})`;
+  screen.append(nav);
+
+  sc.items.push(t => {
+    layers.forEach((L, i) => {
+      const next = layers[i + 1];
+      let o = 1, y = 0;
+      if (i > 0) {
+        const p = easeIO(clamp01((t - L.at) / L.d));
+        if (L.how === 'scroll') { y = (1 - p) * H; if (t < L.at) o = 0; } else o = p;
+      }
+      if (next) {
+        const q = easeIO(clamp01((t - next.at) / next.d));
+        if (next.how === 'scroll') y = -q * H;
+        if (q >= 1) o = 0;
+      }
+      L.el.style.opacity = f(o);
+      L.el.style.transform = y ? `translateY(${f(y)}px)` : 'none';
+    });
+  });
+
+  const shines = steps.filter(s => 'shine' in s).map(s => s.shine);
+  if (shines.length) {
+    const el = document.createElement('div');
+    el.className = 'shine';
+    screen.append(el);
+    sc.items.push(t => {
+      const cur = shines.find(a => t >= a && t <= a + 0.9);
+      el.style.opacity = cur == null ? 0 : 1;
+      if (cur != null) el.style.transform = `translateX(${f(-110 + 330 * easeIO((t - cur) / 0.9))}%)`;
+    });
+  }
+  for (const s of steps.filter(s => s.tap)) {
+    const r = TELAS.shots[s.tap[0]].rects[s.tap[1]];
+    tap(sc, screen, (r.x + r.w / 2) * K, (r.y + r.h / 2) * K, s.at);
+  }
+  for (const s of steps.filter(s => 'confetti' in s)) {
+    bursts.push({ T: sc.start + s.confetti, x: 1420, y: 430, n: 110, power: 900, spread: Math.PI * 2, ang: 0, life: 2.2, seed: bursts.length + 7 });
+  }
+}
+
+function tap(sc, host, x, y, at) {
+  const el = document.createElement('div');
+  el.className = 'tap';
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  el.innerHTML = '<i class="ring"></i><i class="ring2"></i><i class="dot"></i>';
+  host.append(el);
+  const [ring, ring2, dot] = el.children;
+  sc.items.push(t => {
+    const a = clamp01((t - (at - 0.45)) / 0.3);          // dedo chega
+    const b = clamp01((t - at) / 0.55);                   // primeira onda
+    const c = clamp01((t - at - 0.12) / 0.6);             // segunda onda
+    const gone = clamp01((t - (at + 0.2)) / 0.25);        // dedo sai
+    dot.style.opacity = f(easeOut(a) * (1 - gone));
+    dot.style.transform = `scale(${f(1.5 - 0.5 * easeOut(a) - (b > 0 && b < 0.4 ? 0.15 : 0))})`;
+    ring.style.opacity = f(b <= 0 || b >= 1 ? 0 : 1 - b);
+    ring.style.transform = `scale(${f(0.3 + 1.1 * easeOut(b))})`;
+    ring2.style.opacity = f(c <= 0 || c >= 1 ? 0 : 0.8 * (1 - c));
+    ring2.style.transform = `scale(${f(0.3 + 1.7 * easeOut(c))})`;
+  });
+}
+
+/**
+ * Sequência de telas na janela do navegador.
+ * passos: { img, at }                                   troca de tela (transição suave)
+ *         { hl: alvo, at, out, pad }                    destaca um elemento
+ *         { zoom: alvo | null, at, s }                  aproxima de um elemento (null = volta ao normal)
+ *         { tap: alvo, at }
+ * alvo: [tela, elemento] capturado, ou um retângulo { x, y, w, h } em px da tela original
+ */
+function browserSeq(id, steps) {
+  const sc = scene(id), zoomEl = sc.el.querySelector('.zoom');
+  const W = 1180, HV = 787, K = W / TELAS.computador.w;
+  deviceIn(sc, sc.el.querySelector('.browser'), 'browser');
+  const rect = target => {
+    const r = Array.isArray(target) ? TELAS.shots[target[0]].rects[target[1]] : target;
+    return { x: r.x * K, y: r.y * K, w: r.w * K, h: r.h * K };
+  };
+
+  const layers = steps.filter(s => s.img).map((s, i) => {
+    const el = layerImg(TELAS.shots[s.img].file);
+    el.style.zIndex = i + 1;
+    zoomEl.append(el);
+    return { ...s, el };
+  });
+  sc.items.push(t => layers.forEach((L, i) => {
+    const next = layers[i + 1];
+    let o = i === 0 ? 1 : easeIO(clamp01((t - L.at) / 0.5));
+    if (next && t >= next.at + 0.5) o = 0;
+    L.el.style.opacity = f(o);
+  }));
+
+  for (const s of steps.filter(s => s.hl)) {
+    const r = rect(s.hl), pad = s.pad ?? 8;
+    const el = document.createElement('div');
+    el.className = 'hl';
+    Object.assign(el.style, { left: r.x - pad + 'px', top: r.y - pad + 'px', width: r.w + 2 * pad + 'px', height: r.h + 2 * pad + 'px' });
+    zoomEl.append(el);
+    sc.items.push(t => {
+      el.style.opacity = f(easeOut(clamp01((t - s.at) / 0.5)) * (1 - easeIO(clamp01((t - s.out) / 0.4))));
+      el.style.setProperty('--pulse', f(0.5 + 0.5 * Math.sin((t - s.at) * 5)));
+    });
+  }
+
+  // zoom: lista de alvos no tempo; interpola entre o anterior e o próximo
+  const zooms = [{ at: -1, x: 0, y: 0, s: 1 }, ...steps.filter(s => 'zoom' in s).map(z => {
+    if (!z.zoom) return { at: z.at, x: 0, y: 0, s: 1 };
+    const r = rect(z.zoom), s = z.s || 1.4;
+    const x = Math.min(0, Math.max(W - W * s, W / 2 - (r.x + r.w / 2) * s));
+    const y = Math.min(0, Math.max(HV - HV * s, HV / 2 - (r.y + r.h / 2) * s));
+    return { at: z.at, x, y, s };
+  })];
+  sc.items.push(t => {
+    let cur = zooms[0];
+    for (let i = 1; i < zooms.length; i++) {
+      const p = easeIO(clamp01((t - zooms[i].at) / 0.9));
+      cur = { x: cur.x + (zooms[i].x - cur.x) * p, y: cur.y + (zooms[i].y - cur.y) * p, s: cur.s + (zooms[i].s - cur.s) * p };
+    }
+    zoomEl.style.transform = cur.s === 1 ? 'none' : `translate(${f(cur.x)}px, ${f(cur.y)}px) scale(${f(cur.s)})`;
+  });
+
+  for (const s of steps.filter(s => s.tap)) {
+    const r = rect(s.tap);
+    tap(sc, zoomEl, r.x + r.w / 2, r.y + r.h / 2, s.at);
+  }
+}
+
+// =============================================================== roteiro das telas
+phoneSeq('cliente', [
+  { img: 'c1-inicio' },
+  { shine: 1.4 },
+  { img: 'c2-servicos', at: 2.4, how: 'scroll' },
+  { tap: ['c2-servicos', 'agendar'], at: 4.8 },
+  { img: 'c3-servico', at: 5.2, how: 'scroll' },
+  { tap: ['c3-servico', 'profissional'], at: 7.1 },
+  { img: 'c3-profissional', at: 7.4, how: 'fade' },
+  { img: 'c4-dia', at: 8.2, how: 'scroll' },
+  { tap: ['c4-dia', 'dia'], at: 9.5 },
+  { img: 'c4-horarios', at: 9.8, how: 'fade' },
+  { tap: ['c4-horarios', 'horario'], at: 12.6 },
+  { img: 'c5-horario', at: 12.9, how: 'fade' },
+  { img: 'c6-dados', at: 13.8, how: 'scroll' },
+  { tap: ['c6-dados', 'confirmar'], at: 15.9 },
+  { img: 'c7-confirmado', at: 16.3, how: 'fade' },
+  { confetti: 16.6 },
+  { shine: 16.7 },
+]);
+
+phoneSeq('fila', [
+  { img: 'w0-ocupados' },
+  { shine: 1.4 },
+  { tap: ['w0-ocupados', 'horario'], at: 4.3 },
+  { img: 'w1-escolhido', at: 4.6, how: 'fade' },
+  { img: 'w2-resumo', at: 5.6, how: 'scroll' },
+  { tap: ['w2-resumo', 'confirmar'], at: 7.9 },
+  { img: 'w3-na-fila', at: 8.3, how: 'fade' },
+  { shine: 8.7 },
+]);
+
+browserSeq('painel', [
+  { img: 'a1-agenda' },
+  { zoom: { x: 590, y: 246, w: 610, h: 104 }, at: 4.4, s: 1.96 },          // enquadra os dois cartões de faturamento
+  { hl: { x: 602, y: 246, w: 538, h: 104 }, at: 5.1, out: 8.1, pad: 6 },
+  { zoom: null, at: 8.3 },
+  { hl: { x: 966, y: 378, w: 168, h: 416 }, at: 9.3, out: 12.3, pad: 0 },  // coluna de status
+]);
+
+browserSeq('vaga', [
+  { img: 'a2-fila' },
+  { hl: ['a2-fila', 'fila'], at: 2.0, out: 4.4 },
+  { img: 'a3-vaga', at: 4.7 },
+  { hl: ['a3-vaga', 'linha'], at: 5.4, out: 8.7, pad: 2 },
+  { zoom: { x: 50, y: 155, w: 760, h: 78 }, at: 9.0, s: 1.55 },             // aproxima do texto do aviso
+  { zoom: null, at: 11.2 },
+  { hl: ['a3-vaga', 'alerta'], at: 11.8, out: 99 },
+  { tap: ['a3-vaga', 'whats'], at: 12.7 },
+]);
+
+browserSeq('controle', [
+  { img: 'a4-servicos' },
+  { hl: ['a4-servicos', 'tabela'], at: 1.4, out: 4.0, pad: 14 },
+  { img: 'a5-expediente', at: 4.3 },
+  { hl: ['a5-expediente', 'card'], at: 5.0, out: 8.1 },
+  { img: 'a6-folgas', at: 8.4 },
+  { hl: ['a6-folgas', 'lista'], at: 9.1, out: 12.3 },
+]);
+
+phoneSeq('local', [
+  { img: 'l1-endereco' },
+  { shine: 1.4 },
+  { img: 'l2-mapa', at: 3.9, how: 'scroll' },
+]);
+
+// confete do encerramento: um estouro central e dois laterais
+{
+  const s = scene('fim').start;
+  bursts.push({ T: s + 4.0, x: 960, y: 560, n: 190, power: 1250, spread: Math.PI * 2, ang: 0, life: 2.8, seed: 101 });
+  bursts.push({ T: s + 4.25, x: 380, y: 700, n: 80, power: 1100, spread: 1.3, ang: -1.1, life: 2.6, seed: 202 });
+  bursts.push({ T: s + 4.25, x: 1540, y: 700, n: 80, power: 1100, spread: 1.3, ang: -2.05, life: 2.6, seed: 303 });
+}
+
+// =============================================================== partículas e confete (canvas)
+const dustEl = document.getElementById('dust'), fxEl = document.getElementById('fx');
+const fxCtx = fxEl.getContext('2d');
+const DUST = Array.from({ length: 58 }, (_, i) => {
+  const r = rng(1000 + i * 17);
+  return { x: r() * 1920, y: r() * 1140, v: 7 + r() * 20, a: 0.10 + r() * 0.30, rad: 1.1 + r() * 2.5, w: 0.2 + r() * 0.5, ph: r() * 6.283, amp: 10 + r() * 40, tw: 0.6 + r() * 1.6 };
+});
+for (const d of DUST) {
+  d.size = d.rad * 6.8;
+  d.el = document.createElement('i');
+  d.el.style.width = d.el.style.height = d.size + 'px';
+  dustEl.append(d.el);
+}
+function drawDust(T) {
+  for (const d of DUST) {
+    const y = ((d.y - T * d.v) % 1140 + 1140) % 1140 - 30;
+    const x = d.x + Math.sin(T * d.w + d.ph) * d.amp;
+    d.el.style.transform = `translate3d(${f(x - d.size / 2)}px, ${f(y - d.size / 2)}px, 0)`;
+    d.el.style.opacity = f(d.a * (0.55 + 0.45 * Math.sin(T * d.tw + d.ph * 2)));
+  }
+}
+const CONFETTI = ['#2f6fe4', '#1546b8', '#7aa7f7', '#a9c4f7', '#cfe0ff'];
+let fxOn = false;
+function drawFx(T) {
+  const active = bursts.some(b => T >= b.T && T <= b.T + b.life);
+  if (active !== fxOn) { fxOn = active; fxEl.style.display = active ? 'block' : 'none'; }
+  if (!active) return;
+  fxCtx.clearRect(0, 0, 1920, 1080);
+  for (const b of bursts) {
+    const tau = T - b.T;
+    if (tau < 0 || tau > b.life) continue;
+    const k = 1.7, drag = (1 - Math.exp(-k * tau)) / k;   // o ar freia o confete; a gravidade puxa
+    for (let i = 0; i < b.n; i++) {
+      const r = rng(b.seed * 7919 + i * 31);
+      const ang = b.ang + (r() - 0.5) * b.spread, sp = b.power * (0.3 + 0.7 * r());
+      const w = 9 + r() * 11, h = 5 + r() * 7, rot0 = r() * 6.283, spin = (r() - 0.5) * 14, color = CONFETTI[Math.floor(r() * CONFETTI.length)];
+      const x = b.x + Math.cos(ang) * sp * drag, y = b.y + Math.sin(ang) * sp * drag + 420 * tau * tau;
+      fxCtx.save();
+      fxCtx.globalAlpha = clamp01((b.life - tau) / 0.7) * clamp01(tau / 0.05);
+      fxCtx.translate(x, y);
+      fxCtx.rotate(rot0 + spin * tau);
+      fxCtx.scale(1, Math.cos(tau * 9 + rot0));           // gira no eixo, como papel caindo
+      fxCtx.fillStyle = color;
+      fxCtx.fillRect(-w / 2, -h / 2, w, h);
+      fxCtx.restore();
+    }
+  }
+}
+
+// =============================================================== desenhar um instante
+const wipeEl = document.getElementById('wipe'), barsEl = wipeEl.firstElementChild;
+const blackout = document.getElementById('blackout'), progress = document.querySelector('#progress i');
+const CUTS = scenes.slice(1).map(s => s.start), WIPE = 1.2;
+
+function draw(T) {
+  const lastScene = scenes.at(-1);
+  for (const sc of scenes) {
+    const on = T >= sc.start && (T < sc.end || sc === lastScene);
+    sc.el.style.visibility = on ? 'visible' : 'hidden';
+    if (!on) continue;
+    const local = T - sc.start;
+    const settle = easeOut(clamp01(local / 1.1)); // a cena "assenta" ao entrar
+    sc.el.style.transform = settle >= 1 ? 'none' : `scale(${f(1.04 - 0.04 * settle)})`;
+    for (const item of sc.items) item(local, T);
+  }
+  // A poeira anda em passos de 0,1 s: são pontos lentos, não se nota, e evita repintar a tela
+  // inteira em todos os quadros (o que triplicava o tempo de renderização).
+  drawDust(Math.floor(T * 10 + 1e-6) / 10);
+  drawFx(T);
+  progress.style.transform = `scaleX(${f(clamp01(T / DURACAO))})`;
+
+  // troca de cena: a faixa escura cobre a tela exatamente no instante do corte
+  const cut = CUTS.find(c => Math.abs(T - c) < WIPE / 2);
+  wipeEl.style.visibility = cut == null ? 'hidden' : 'visible';
+  if (cut != null) barsEl.style.transform = `translateX(${f(-884 + (easeIO((T - cut) / WIPE + 0.5) - 0.5) * 6300)}px) skewX(-18deg)`;
+
+  blackout.style.opacity = f(1 - clamp01(T / 0.7)); // abre do branco
+}
+
+const renderMode = new URLSearchParams(location.search).has('render');
+
+// usado pelo renderizador: espera fontes e imagens, depois desenha instantes sob comando
+window.pronto = (async () => {
+  await document.fonts.ready;
+  await Promise.all([...document.images].map(i => i.decode().catch(() => {})));
+  draw(0);
+  return {
+    duracao: DURACAO,
+    cenas: scenes.map(s => ({ id: s.id, inicio: +s.start.toFixed(2), fim: +s.end.toFixed(2) })),
+    falas: scenes.flatMap(s => s.falas.map(x => ({ url: '/' + x.arquivo, t: +(s.start + x.at).toFixed(3), ini: x.ini, dur: x.dur }))),
+  };
+})();
+// A captura de tela já força o navegador a pintar o quadro; não é preciso esperar por ele aqui.
+// (Medido: o quadro capturado é idêntico com ou sem espera, e esperar custava ~90 ms por quadro.)
+window.irPara = async t => { draw(t); return String(t); };
+
+// Aberto direto no navegador: toca em tempo real, ajustado à janela.
+// Espaço pausa; setas avançam/voltam; um clique liga a narração.
+if (!renderMode) {
+  const stage = document.getElementById('stage'), hud = document.getElementById('hud');
+  const fit = () => {
+    const k = Math.min(innerWidth / 1920, innerHeight / 1080);
+    stage.style.transform = `translate(${(innerWidth - 1920 * k) / 2}px, ${(innerHeight - 1080 * k) / 2}px) scale(${k})`;
+  };
+  addEventListener('resize', fit); fit();
+  let t = Number(new URLSearchParams(location.search).get('t')) || 0, playing = true, prev = performance.now(), sound = false, lastT = t;
+  const cues = scenes.flatMap(s => s.falas.map(x => ({ t: s.start + x.at, ini: x.ini, dur: x.dur, src: x.arquivo })));
+  addEventListener('click', () => { sound = true; });
+  addEventListener('keydown', e => {
+    sound = true;
+    if (e.key === ' ') playing = !playing;
+    if (e.key === 'ArrowRight') t = Math.min(DURACAO, t + 2);
+    if (e.key === 'ArrowLeft') t = Math.max(0, t - 2);
+  });
+  window.pronto.then(function loop() {
+    const now = performance.now();
+    if (playing) t += (now - prev) / 1000;
+    prev = now;
+    if (t > DURACAO + 1.5) t = 0;
+    if (sound && playing) for (const c of cues) if (lastT < c.t && t >= c.t && t - c.t < 0.3) {
+      const a = new Audio(c.src);
+      a.currentTime = c.ini;
+      a.play().catch(() => {});
+      setTimeout(() => a.pause(), c.dur * 1000);
+    }
+    lastT = t;
+    draw(Math.min(t, DURACAO));
+    hud.textContent = `${Math.min(t, DURACAO).toFixed(1)}s / ${DURACAO.toFixed(1)}s · espaço pausa · ← → navegam · ${sound ? 'narração ligada' : 'clique para ouvir a narração'}`;
+    requestAnimationFrame(loop);
+  });
+}
+</script>
+</body>
+</html>

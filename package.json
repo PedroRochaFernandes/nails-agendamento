@@ -1,0 +1,14 @@
+{
+  "name": "nails-agendamento",
+  "version": "1.0.0",
+  "description": "Sistema de agendamento online para nail designers e estúdios de unhas: agenda, serviços, preços, horários e painel do dono.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server.js",
+    "dev": "node --disable-warning=ExperimentalWarning --watch server.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}

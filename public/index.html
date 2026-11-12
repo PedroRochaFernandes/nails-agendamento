@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Estúdio de unhas — Agendamento online</title>
+  <meta name="description" content="Agende manicure, pedicure, gel e alongamento online em poucos cliques.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232f6fe4'/><rect x='13' y='4' width='6' height='9' rx='1.5' fill='%23ffffff'/><rect x='11.5' y='12' width='9' height='3' rx='1' fill='%23ffffff'/><rect x='8.5' y='15' width='15' height='14' rx='4.5' fill='%23ffffff'/></svg>">
+</head>
+<body>
+  <nav class="nav">
+    <div class="container">
+      <a class="brand" href="#"><svg class="brand-mark" width="14" height="26" viewBox="0 0 14 26" aria-hidden="true"><rect x="4.5" y="0" width="5" height="9" rx="1.5" fill="#1546b8"/><rect x="3" y="8.5" width="8" height="2.5" rx="1" fill="#1546b8"/><rect x="0.5" y="11" width="13" height="15" rx="4" fill="#2f6fe4"/><rect x="3" y="14" width="2" height="8" rx="1" fill="#ffffff" opacity=".55"/></svg><span data-bind="shop_name">Estúdio de unhas</span></a>
+      <div class="nav-links">
+        <a href="#servicos">Serviços</a>
+        <a href="#localizacao">Localização</a>
+        <a href="#meu-agendamento">Meu agendamento</a>
+        <a class="btn btn-primary btn-sm" href="#agendar">Agendar</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="container">
+      <span class="badge-open" id="open-badge">Carregando…</span>
+      <h1 data-bind="shop_name">Estúdio de unhas</h1>
+      <p data-bind="about"></p>
+      <div class="actions">
+        <a class="btn btn-primary btn-lg" href="#agendar">Agendar horário</a>
+        <a class="btn btn-lg" href="#localizacao">Como chegar</a>
+      </div>
+    </div>
+  </header>
+
+  <section id="servicos">
+    <div class="container">
+      <h2>Serviços e preços</h2>
+      <p class="muted">Valores fixos, sem surpresa na hora de pagar.</p>
+      <div class="services" id="service-list"></div>
+    </div>
+  </section>
+
+  <section id="agendar">
+    <div class="container">
+      <h2>Agende seu horário</h2>
+      <p class="muted">Escolha o serviço, o profissional e o melhor horário. Leva menos de um minuto.</p>
+
+      <div class="booking" id="booking">
+        <div>
+          <div class="step" id="step-service">
+            <div class="step-title"><span class="step-num">1</span> Serviço</div>
+            <div class="choices" id="service-choices"></div>
+          </div>
+
+          <div class="step" id="step-pro">
+            <div class="step-title"><span class="step-num">2</span> Profissional</div>
+            <div class="choices" id="pro-choices"></div>
+          </div>
+
+          <div class="step" id="step-date">
+            <div class="step-title"><span class="step-num">3</span> Dia</div>
+            <div class="days" id="days"></div>
+          </div>
+
+          <div class="step" id="step-time">
+            <div class="step-title"><span class="step-num">4</span> Horário</div>
+            <div id="slots"><div class="empty">Escolha um serviço e um dia para ver os horários livres.</div></div>
+          </div>
+
+          <form class="step hidden" id="step-form" autocomplete="on">
+            <div class="step-title"><span class="step-num">5</span> Seus dados</div>
+            <div class="row">
+              <div class="field">
+                <label for="f-name">Nome</label>
+                <input id="f-name" name="name" required minlength="2" maxlength="80" autocomplete="name">
+              </div>
+              <div class="field">
+                <label for="f-phone">WhatsApp / telefone (com DDD)</label>
+                <input id="f-phone" name="phone" required inputmode="tel" autocomplete="tel" placeholder="(11) 91234-5678">
+              </div>
+            </div>
+            <div class="field">
+              <label for="f-notes">Observações (opcional)</label>
+              <textarea id="f-notes" name="notes" maxlength="300" placeholder="Ex.: quero formato amendoado, cor nude"></textarea>
+            </div>
+          </form>
+        </div>
+
+        <aside class="card summary" id="summary">
+          <h3>Resumo</h3>
+          <dl>
+            <dt>Serviço</dt><dd id="sum-service">—</dd>
+            <dt>Profissional</dt><dd id="sum-pro">Qualquer um</dd>
+            <dt>Data</dt><dd id="sum-date">—</dd>
+            <dt>Horário</dt><dd id="sum-time">—</dd>
+            <dt>Duração</dt><dd id="sum-duration">—</dd>
+          </dl>
+          <div class="total"><span>Total</span><span id="sum-price">—</span></div>
+          <p class="wait-note hidden" id="wait-note"></p>
+          <button class="btn btn-primary btn-lg" style="width:100%" id="confirm" disabled>Confirmar agendamento</button>
+          <p class="muted small" style="margin:12px 0 0">Pagamento no estúdio. Você pode cancelar online com o código do agendamento.</p>
+        </aside>
+      </div>
+
+      <div class="card success hidden" id="success">
+        <h2 id="success-title">Agendamento confirmado</h2>
+        <p class="muted" id="success-text"></p>
+        <p class="small muted" style="margin-bottom:0">Guarde seu código:</p>
+        <div class="code" id="success-code"></div>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <a class="btn" id="success-whats" target="_blank" rel="noopener">Avisar pelo WhatsApp</a>
+          <button class="btn btn-primary" id="book-again">Fazer outro agendamento</button>
+        </div>
+        <p class="small muted" style="margin:20px 0 0">Precisa desmarcar? <button type="button" class="link-btn" id="success-cancel">Cancelar este agendamento</button></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="meu-agendamento">
+    <div class="container" style="max-width:640px">
+      <h2>Meu agendamento</h2>
+      <p class="muted">Consulte ou cancele seu agendamento, ou veja seu lugar na fila de espera, com o código recebido e o telefone informado.</p>
+      <form class="card" id="lookup-form">
+        <div class="row">
+          <div class="field"><label for="l-code">Código</label><input id="l-code" required maxlength="6" style="text-transform:uppercase" placeholder="ABC123"></div>
+          <div class="field"><label for="l-phone">Telefone</label><input id="l-phone" required inputmode="tel"></div>
+        </div>
+        <button class="btn btn-primary">Consultar</button>
+      </form>
+      <div id="lookup-result" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section id="localizacao">
+    <div class="container">
+      <h2>Localização e horários</h2>
+      <div class="location">
+        <div class="card">
+          <h3>Endereço</h3>
+          <p data-bind="address"></p>
+          <p><a id="directions" target="_blank" rel="noopener">Abrir no Google Maps →</a></p>
+          <h3 style="margin-top:24px">Contato</h3>
+          <p><span data-bind="phone"></span><br><a id="whats-link" target="_blank" rel="noopener">WhatsApp</a> <span id="insta-wrap"></span></p>
+          <h3 style="margin-top:24px">Funcionamento</h3>
+          <table class="hours" id="hours"></table>
+        </div>
+        <iframe class="map" id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Mapa"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <span>© <span id="year"></span> <span data-bind="shop_name"></span></span>
+      <a href="/admin" class="muted">Área da profissional</a>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/common.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

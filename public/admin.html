@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Painel do Estúdio</title>
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232f6fe4'/><rect x='13' y='4' width='6' height='9' rx='1.5' fill='%23ffffff'/><rect x='11.5' y='12' width='9' height='3' rx='1' fill='%23ffffff'/><rect x='8.5' y='15' width='15' height='14' rx='4.5' fill='%23ffffff'/></svg>">
+  <style>
+    .login { min-height: 100vh; display: grid; place-items: center; padding: 16px; }
+    .login .card { width: min(380px, 100%); }
+    .tabs { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--border); margin: 24px 0; }
+    .tab { background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted); padding: 12px 16px; font: 600 .95rem var(--font); cursor: pointer; white-space: nowrap; }
+    .tab[aria-selected="true"] { color: var(--text); border-color: var(--accent-text); }
+    .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+    .toolbar input[type="date"] { width: auto; }
+    .stats { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 20px; }
+    .stat b { display: block; font: 600 2rem var(--display); font-variant-numeric: tabular-nums; }
+    .appt { display: grid; grid-template-columns: 70px 1fr auto; gap: 14px; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .appt:last-child { border-bottom: 0; }
+    .appt .time { font: 600 1.3rem/1.1 var(--display); font-variant-numeric: tabular-nums; }
+    .appt.cancelled { opacity: .5; }
+    .appt select { width: auto; padding: 6px 8px; font-size: .85rem; }
+    @media (max-width: 600px) { .appt { grid-template-columns: 56px 1fr; } .appt > :last-child { grid-column: 1 / -1; } }
+    table.grid { width: 100%; border-collapse: collapse; }
+    table.grid th { text-align: left; font-size: .8rem; color: var(--muted); font-weight: 500; padding: 6px 6px; }
+    table.grid td { padding: 6px; border-top: 1px solid var(--border); vertical-align: middle; }
+    table.grid input { padding: 7px 9px; font-size: .9rem; }
+    .scroll-x { overflow-x: auto; }
+    .pro-card { margin-bottom: 16px; }
+    .pro-card header { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; margin-bottom: 12px; }
+    .pro-card header .field { margin: 0; flex: 1 1 200px; }
+    .modal { position: fixed; inset: 0; background: rgba(15,29,58,.45); display: grid; place-items: center; padding: 16px; z-index: 50; }
+    .modal .card { width: min(520px, 100%); max-height: 90vh; overflow: auto; }
+    .alert { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 14px 16px; margin-bottom: 12px; border-radius: var(--radius); border: 1px solid var(--border); border-left: 3px solid var(--accent-text); background: var(--accent-soft); }
+    .alert > div:first-child { flex: 1 1 260px; }
+    .alert-cancel { border-left-color: var(--danger); background: rgba(200, 55, 45, .06); }
+    .tag-cancel { border-color: var(--danger); color: var(--danger); }
+    .appt-actions { display: flex; gap: 8px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
+    .cancel-why { margin-top: 4px; color: var(--danger); }
+    .appt.cancelled .cancel-why { opacity: 1; }
+    .wa-preview { white-space: pre-wrap; font-size: .9rem; padding: 12px 14px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); margin: 12px 0 16px; }
+    .tag { display: inline-block; font-size: .72rem; font-weight: 600; padding: 1px 8px; border-radius: 99px; border: 1px solid var(--accent-text); color: var(--accent-text); vertical-align: 1px; }
+    .check { display: flex; gap: 8px; align-items: center; color: var(--text); font-size: .95rem; margin: 0; }
+  </style>
+</head>
+<body>
+  <!-- LOGIN -->
+  <div class="login" id="login-view">
+    <form class="card" id="login-form">
+      <h2>Área da profissional</h2>
+      <div class="field"><label for="password">Senha</label><input type="password" id="password" required autocomplete="current-password" autofocus></div>
+      <button class="btn btn-primary" style="width:100%">Entrar</button>
+      <p class="muted small" style="margin-bottom:0"><a href="/">← Voltar ao site</a></p>
+    </form>
+  </div>
+
+  <!-- PAINEL -->
+  <div class="hidden" id="app-view">
+    <nav class="nav">
+      <div class="container">
+        <a class="brand" href="/" target="_blank"><svg class="brand-mark" width="14" height="26" viewBox="0 0 14 26" aria-hidden="true"><rect x="4.5" y="0" width="5" height="9" rx="1.5" fill="#1546b8"/><rect x="3" y="8.5" width="8" height="2.5" rx="1" fill="#1546b8"/><rect x="0.5" y="11" width="13" height="15" rx="4" fill="#2f6fe4"/><rect x="3" y="14" width="2" height="8" rx="1" fill="#ffffff" opacity=".55"/></svg><span id="shop-name">Painel</span></a>
+        <div class="nav-links"><button class="btn btn-sm" id="logout">Sair</button></div>
+      </div>
+    </nav>
+
+    <main class="container" style="padding-bottom:64px">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" data-tab="agenda" aria-selected="true">Agenda</button>
+        <button class="tab" role="tab" data-tab="services">Serviços e preços</button>
+        <button class="tab" role="tab" data-tab="pros">Profissionais e expediente</button>
+        <button class="tab" role="tab" data-tab="blocks">Folgas e bloqueios</button>
+        <button class="tab" role="tab" data-tab="settings">Estúdio</button>
+      </div>
+
+      <!-- AGENDA -->
+      <section class="panel" data-panel="agenda" style="padding:0">
+        <!-- clientes da fila de espera que ganharam um horário e ainda precisam ser avisados -->
+        <div id="waitlist-alerts"></div>
+        <div class="toolbar">
+          <button class="btn btn-sm" id="day-prev" aria-label="Dia anterior">←</button>
+          <input type="date" id="agenda-date">
+          <button class="btn btn-sm" id="day-next" aria-label="Próximo dia">→</button>
+          <button class="btn btn-sm" id="day-today">Hoje</button>
+          <select id="agenda-pro" style="width:auto"></select>
+          <button class="btn btn-primary btn-sm" id="new-appt" style="margin-left:auto">+ Novo agendamento</button>
+        </div>
+        <h3 id="agenda-title"></h3>
+        <div class="stats" id="stats"></div>
+        <div class="card" style="padding:0" id="agenda-list"></div>
+
+        <h3 style="margin-top:28px">Fila de espera do dia</h3>
+        <p class="muted small" style="margin-top:-4px">Clientes aguardando um horário ocupado. Se o horário vagar, o primeiro da fila é agendado automaticamente.</p>
+        <div class="card" style="padding:0" id="waitlist-day"></div>
+      </section>
+
+      <!-- SERVIÇOS -->
+      <section class="panel hidden" data-panel="services" style="padding:0">
+        <div class="toolbar"><h3 style="margin:0">Serviços</h3><button class="btn btn-primary btn-sm" id="add-service" style="margin-left:auto">+ Novo serviço</button></div>
+        <div class="card scroll-x">
+          <table class="grid" id="services-table">
+            <thead><tr><th>Nome</th><th>Descrição</th><th style="width:120px">Preço (R$)</th><th style="width:110px">Duração (min)</th><th>Ativo</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="muted small">Serviços desativados somem do site, mas continuam no histórico.</p>
+      </section>
+
+      <!-- PROFISSIONAIS -->
+      <section class="panel hidden" data-panel="pros" style="padding:0">
+        <div class="toolbar"><h3 style="margin:0">Profissionais e expediente semanal</h3><button class="btn btn-primary btn-sm" id="add-pro" style="margin-left:auto">+ Nova profissional</button></div>
+        <div id="pros-list"></div>
+      </section>
+
+      <!-- BLOQUEIOS -->
+      <section class="panel hidden" data-panel="blocks" style="padding:0">
+        <form class="card" id="block-form" style="margin-bottom:20px">
+          <h3>Bloquear horário ou dia</h3>
+          <p class="muted small">Use para folgas, feriados, férias ou compromissos. Horários bloqueados não aparecem para os clientes.</p>
+          <div class="row">
+            <div class="field"><label for="b-date">Data</label><input type="date" id="b-date" required></div>
+            <div class="field"><label for="b-pro">Quem</label><select id="b-pro"></select></div>
+            <div class="field"><label for="b-start">De</label><input type="time" id="b-start"></div>
+            <div class="field"><label for="b-end">Até</label><input type="time" id="b-end"></div>
+          </div>
+          <div class="row">
+            <div class="field"><label for="b-reason">Motivo (opcional)</label><input id="b-reason" maxlength="100" placeholder="Feriado, médico, curso…"></div>
+            <div class="field" style="display:flex;align-items:end"><label class="check"><input type="checkbox" id="b-allday"> Dia inteiro</label></div>
+          </div>
+          <button class="btn btn-primary">Adicionar bloqueio</button>
+        </form>
+        <h3>Próximos bloqueios</h3>
+        <div class="card" style="padding:0" id="blocks-list"></div>
+      </section>
+
+      <!-- CONFIGURAÇÕES -->
+      <section class="panel hidden" data-panel="settings" style="padding:0">
+        <form class="card" id="settings-form" style="margin-bottom:20px">
+          <h3>Dados do estúdio</h3>
+          <div class="row">
+            <div class="field"><label for="s-shop_name">Nome</label><input id="s-shop_name" name="shop_name" required></div>
+            <div class="field"><label for="s-phone">Telefone (exibição)</label><input id="s-phone" name="phone"></div>
+            <div class="field"><label for="s-whatsapp">WhatsApp (só números, com DDD)</label><input id="s-whatsapp" name="whatsapp" inputmode="tel" placeholder="5511999990000"></div>
+            <div class="field"><label for="s-instagram">Instagram</label><input id="s-instagram" name="instagram" placeholder="@seuestudio"></div>
+          </div>
+          <div class="field"><label for="s-address">Endereço completo (usado no mapa)</label><input id="s-address" name="address"></div>
+          <div class="field"><label for="s-about">Descrição</label><textarea id="s-about" name="about" maxlength="600"></textarea></div>
+
+          <h3 style="margin-top:12px">Regras de agendamento</h3>
+          <div class="row">
+            <div class="field"><label for="s-slot_step">Intervalo entre horários (min)</label><input type="number" id="s-slot_step" name="slot_step" min="5" max="120"></div>
+            <div class="field"><label for="s-min_advance_min">Antecedência mínima p/ agendar (min)</label><input type="number" id="s-min_advance_min" name="min_advance_min" min="0"></div>
+            <div class="field"><label for="s-max_days_ahead">Agendar até quantos dias à frente</label><input type="number" id="s-max_days_ahead" name="max_days_ahead" min="1" max="365"></div>
+            <div class="field"><label for="s-cancel_advance_min">Antecedência p/ cliente cancelar (min)</label><input type="number" id="s-cancel_advance_min" name="cancel_advance_min" min="0"></div>
+          </div>
+          <button class="btn btn-primary">Salvar</button>
+        </form>
+
+        <form class="card" id="password-form">
+          <h3>Trocar senha do painel</h3>
+          <div class="row">
+            <div class="field"><label for="p-current">Senha atual</label><input type="password" id="p-current" required autocomplete="current-password"></div>
+            <div class="field"><label for="p-next">Nova senha</label><input type="password" id="p-next" required minlength="6" autocomplete="new-password"></div>
+          </div>
+          <button class="btn">Trocar senha</button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL: cancelar agendamento (pelo estúdio) -->
+  <div class="modal hidden" id="cancel-modal">
+    <form class="card" id="cancel-form">
+      <h3>Cancelar agendamento</h3>
+      <p class="muted" id="cx-info"></p>
+      <div class="field">
+        <label for="cx-reason">Motivo (vai na mensagem para a cliente)</label>
+        <textarea id="cx-reason" rows="3" maxlength="300" placeholder="Ex.: a profissional ficou doente"></textarea>
+      </div>
+      <p class="muted small">Se alguém estiver na fila de espera deste horário, a vaga passa automaticamente para a primeira da fila.</p>
+      <div class="form-actions">
+        <button type="button" class="btn" id="cx-back">Voltar</button>
+        <button class="btn btn-danger-solid" id="cx-confirm">Cancelar agendamento</button>
+      </div>
+    </form>
+    <div class="card hidden" id="cancel-done">
+      <h3>Agendamento cancelado</h3>
+      <p class="muted" id="cx-done-text"></p>
+      <div class="wa-preview" id="cx-preview"></div>
+      <div class="form-actions">
+        <button type="button" class="btn" id="cx-close">Fechar</button>
+        <a class="btn btn-primary" id="cx-whats" target="_blank" rel="noopener">Avisar no WhatsApp</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: novo agendamento -->
+  <div class="modal hidden" id="appt-modal">
+    <form class="card" id="appt-form">
+      <h3>Novo agendamento (balcão / telefone)</h3>
+      <div class="row">
+        <div class="field"><label for="m-service">Serviço</label><select id="m-service" required></select></div>
+        <div class="field"><label for="m-pro">Profissional</label><select id="m-pro"></select></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="m-date">Data</label><input type="date" id="m-date" required></div>
+        <div class="field"><label for="m-time">Horário livre</label><select id="m-time" required></select></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="m-name">Cliente</label><input id="m-name" required minlength="2"></div>
+        <div class="field"><label for="m-phone">Telefone</label><input id="m-phone" required inputmode="tel"></div>
+      </div>
+      <div class="field"><label for="m-notes">Observações</label><input id="m-notes"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" class="btn" id="m-cancel">Fechar</button>
+        <button class="btn btn-primary">Agendar</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/common.js"></script>
+  <script src="/admin.js"></script>
+</body>
+</html>
