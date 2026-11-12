@@ -1,6 +1,6 @@
 # 💅 Nail Designer — Agendamento online
 
-Sistema completo para nail designers e estúdios de unhas: site da cliente com agendamento online e painel para o estúdio administrar a agenda. Visual claro, em branco e azul.
+Sistema completo para nail designers e estúdios de unhas: site da cliente com agendamento online e painel para o estúdio administrar a agenda. Visual minimalista, em preto e rosa.
 
 **Sem dependências**: só precisa do Node.js 22.13+ (usa o SQLite embutido no Node).
 
@@ -60,7 +60,7 @@ public/
   admin.html     Painel do estúdio
   admin.js
   common.js      Funções compartilhadas
-  style.css      Tema branco e azul
+  style.css      Tema preto e rosa
 ```
 
 ## Vídeo de apresentação

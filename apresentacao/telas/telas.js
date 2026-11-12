@@ -1,6 +1,6 @@
 // Gerado por capturar-telas.mjs
 window.TELAS = {
- "dia": "2026-11-13",
+ "dia": "2026-11-17",
  "celular": {
   "w": 390,
   "h": 844
@@ -18,10 +18,10 @@ window.TELAS = {
    "file": "telas/c2-servicos.png",
    "rects": {
     "agendar": {
-     "x": 37,
-     "y": 733,
-     "w": 316,
-     "h": 33
+     "x": 285,
+     "y": 600,
+     "w": 85,
+     "h": 30
     }
    }
   },
@@ -29,10 +29,10 @@ window.TELAS = {
    "file": "telas/c3-servico.png",
    "rects": {
     "profissional": {
-     "x": 16,
-     "y": 866,
-     "w": 358,
-     "h": 77
+     "x": 20,
+     "y": 915,
+     "w": 350,
+     "h": 81
     }
    }
   },
@@ -44,10 +44,10 @@ window.TELAS = {
    "file": "telas/c4-dia.png",
    "rects": {
     "dia": {
-     "x": 160,
-     "y": 114,
-     "w": 64,
-     "h": 84
+     "x": 20,
+     "y": 118,
+     "w": 66,
+     "h": 88
     }
    }
   },
@@ -55,10 +55,10 @@ window.TELAS = {
    "file": "telas/c4-horarios.png",
    "rects": {
     "horario": {
-     "x": 108,
-     "y": 582,
-     "w": 84,
-     "h": 56
+     "x": 110,
+     "y": 579,
+     "w": 82,
+     "h": 50
     }
    }
   },
@@ -70,10 +70,10 @@ window.TELAS = {
    "file": "telas/c6-dados.png",
    "rects": {
     "confirmar": {
-     "x": 37,
-     "y": 745,
-     "w": 316,
-     "h": 53
+     "x": 45,
+     "y": 815,
+     "w": 300,
+     "h": 52
     }
    }
   },
@@ -85,10 +85,10 @@ window.TELAS = {
    "file": "telas/w0-ocupados.png",
    "rects": {
     "horario": {
-     "x": 16,
-     "y": 390,
-     "w": 84,
-     "h": 56
+     "x": 20,
+     "y": 405,
+     "w": 82,
+     "h": 50
     }
    }
   },
@@ -100,16 +100,16 @@ window.TELAS = {
    "file": "telas/w2-resumo.png",
    "rects": {
     "confirmar": {
-     "x": 37,
-     "y": 507,
-     "w": 316,
-     "h": 53
+     "x": 45,
+     "y": 548,
+     "w": 300,
+     "h": 52
     },
     "nota": {
-     "x": 37,
-     "y": 368,
-     "w": 316,
-     "h": 125
+     "x": 45,
+     "y": 402,
+     "w": 300,
+     "h": 132
     }
    }
   },
@@ -129,22 +129,22 @@ window.TELAS = {
    "file": "telas/a1-agenda.png",
    "rects": {
     "stats": {
-     "x": 60,
+     "x": 40,
      "y": 251,
-     "w": 1080,
-     "h": 108
+     "w": 1120,
+     "h": 118
     },
     "lista": {
-     "x": 60,
-     "y": 379,
-     "w": 1080,
-     "h": 1201
+     "x": 40,
+     "y": 389,
+     "w": 1120,
+     "h": 1204
     },
     "novo": {
-     "x": 974,
-     "y": 164,
-     "w": 166,
-     "h": 33
+     "x": 991,
+     "y": 167,
+     "w": 169,
+     "h": 30
     }
    }
   },
@@ -152,9 +152,9 @@ window.TELAS = {
    "file": "telas/a2-fila.png",
    "rects": {
     "fila": {
-     "x": 60,
+     "x": 40,
      "y": 655,
-     "w": 1080,
+     "w": 1120,
      "h": 81
     }
    }
@@ -163,22 +163,22 @@ window.TELAS = {
    "file": "telas/a3-vaga.png",
    "rects": {
     "alerta": {
-     "x": 60,
-     "y": 157,
-     "w": 1080,
+     "x": 40,
+     "y": 159,
+     "w": 1120,
      "h": 81
     },
     "linha": {
-     "x": 61,
-     "y": 658,
-     "w": 1078,
+     "x": 41,
+     "y": 670,
+     "w": 1118,
      "h": 80
     },
     "whats": {
-     "x": 870,
-     "y": 181,
-     "w": 159,
-     "h": 33
+     "x": 883,
+     "y": 185,
+     "w": 162,
+     "h": 30
     }
    }
   },
@@ -186,10 +186,10 @@ window.TELAS = {
    "file": "telas/a4-servicos.png",
    "rects": {
     "tabela": {
-     "x": 81,
-     "y": 228,
-     "w": 1038,
-     "h": 367
+     "x": 65,
+     "y": 231,
+     "w": 1070,
+     "h": 354
     }
    }
   },
@@ -197,10 +197,10 @@ window.TELAS = {
    "file": "telas/a5-expediente.png",
    "rects": {
     "card": {
-     "x": 60,
-     "y": 207,
-     "w": 1080,
-     "h": 602
+     "x": 40,
+     "y": 206,
+     "w": 1120,
+     "h": 611
     }
    }
   },
@@ -208,16 +208,16 @@ window.TELAS = {
    "file": "telas/a6-folgas.png",
    "rects": {
     "form": {
-     "x": 60,
-     "y": 158,
-     "w": 1080,
-     "h": 329
+     "x": 40,
+     "y": 160,
+     "w": 1120,
+     "h": 341
     },
     "lista": {
-     "x": 60,
-     "y": 539,
-     "w": 1080,
-     "h": 241
+     "x": 40,
+     "y": 551,
+     "w": 1120,
+     "h": 242
     }
    }
   }

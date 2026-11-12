@@ -34,9 +34,9 @@ if ((await api('GET', `/api/admin/appointments?from=${D}&to=${D}`)).length) {
   throw new Error('Este servidor já tem agendamentos no dia da demonstração. Use um banco novo (DB_FILE).');
 }
 await api('PUT', '/api/admin/settings', {
-  shop_name: 'Azul Nail Studio',
+  shop_name: 'Rosé Nail Studio',
   about: 'Esmaltação em gel, alongamento e nail art com acabamento impecável, e aquele café enquanto você espera.',
-  instagram: '@azulnailstudio',
+  instagram: '@rosenailstudio',
 });
 
 // [profissional (1 = Juliana, 2 = Camila), serviço, hora, cliente, telefone, status]
@@ -129,6 +129,9 @@ await click(m, '[data-pro="2"]');                       // Camila
 await shot(m, 'c3-profissional');
 
 await scrollTo(m, '#step-date');
+// o dia da demonstração pode estar fora da faixa visível de dias: traz para a tela
+await m.run(d => { const el = document.querySelector(`[data-date="${d}"]`); el.parentElement.scrollLeft = el.offsetLeft - el.parentElement.offsetLeft - 8; }, D);
+await sleep(200);
 await shot(m, 'c4-dia', { dia: `[data-date="${D}"]` });
 await click(m, `[data-date="${D}"]`);
 await shot(m, 'c4-horarios', { horario: '[data-time="15:00"]' });
